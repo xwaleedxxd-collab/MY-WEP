@@ -136,7 +136,6 @@
         .menu-btn.primary { background-color: var(--dark-blue); color: white; border: none; }
         .menu-btn.secondary { background-color: #f1f5f9; color: var(--text-color); border: none; }
 
-        /* شريط التحكم بالتنقل داخل التدريب */
         .practice-nav {
             display: flex;
             justify-content: space-between;
@@ -245,7 +244,7 @@
             <p>بكرة جملة...</p>
             <p>وبعدها بتلقى نفسك تتكلم إنجليزي بدون ما تحس.</p>
         </div>
-        <button id="start-btn" class="main-btn">ابدأ 🚀</button>
+        <button id="start-btn" class="main-btn" onclick="showScreen('selection-page')">ابدأ 🚀</button>
     </div>
 
     <!-- 2. اختيار الحساب -->
@@ -286,10 +285,9 @@
 
     <!-- 4. تدريب الكلمات -->
     <div id="practice-page" class="screen">
-        <!-- شريط تحكم للتنقل (إلغاء، سابق، سكب) -->
         <div class="practice-nav">
             <button class="nav-btn-icon" onclick="exitToDashboard()">🏠 خروج</button>
-            <span style="color: var(--dark-gray); font-size: 13px; font-weight:bold;" id="progress-text">1 من 5</span>
+            <span style="color: var(--dark-gray); font-size: 13px; font-weight:bold;" id="progress-text">الكلمة 1 من 1</span>
             <div>
                 <button class="nav-btn-icon" id="prev-btn" onclick="prevWord()">⏪ السابق</button>
                 <button class="nav-btn-icon" onclick="skipWord()">⏭️ سكب</button>
@@ -310,10 +308,9 @@
 
     <!-- 5. تدريب الجمل والنصوص -->
     <div id="text-practice-page" class="screen">
-        <!-- شريط تحكم للتنقل -->
         <div class="practice-nav">
             <button class="nav-btn-icon" onclick="exitToDashboard()">🏠 خروج</button>
-            <span style="color: var(--dark-gray); font-size: 13px; font-weight:bold;" id="text-progress-text">1 من 2</span>
+            <span style="color: var(--dark-gray); font-size: 13px; font-weight:bold;" id="text-progress-text">النص 1 من 1</span>
             <div>
                 <button class="nav-btn-icon" id="text-prev-btn" onclick="prevText()">⏪ السابق</button>
                 <button class="nav-btn-icon" onclick="skipText()">⏭️ سكب</button>
@@ -337,250 +334,6 @@
         <button class="main-btn" onclick="showDashboard()">العودة للرئيسية 🏠</button>
     </div>
 
-    <script>
-        // === موسّع الكلمات المتنوعة حسب المستويات ===
-        const wordsDatabase = {
-            easy: [
-                { word: "cat", meaning: "قطة", example: "The cat is sleeping.", translation: "القطة نائمة." },
-                { word: "sun", meaning: "شمس", example: "The sun is bright.", translation: "الشمس ساطعة." },
-                { word: "book", meaning: "كتاب", example: "I read a book.", translation: "أنا أقرأ كتاباً." },
-                { word: "happy", meaning: "سعيد", example: "Be happy today.", translation: "كن سعيداً اليوم." },
-                { word: "moon", meaning: "قمر", example: "The moon looks nice.", translation: "القمر يبدو جميلاً." },
-                { word: "smile", meaning: "ابتسامة", example: "Keep smiling.", translation: "استمر بالابتسام." }
-            ],
-            medium: [
-                { word: "friend", meaning: "صديق", example: "You are a good friend.", translation: "أنت صديق جيد." },
-                { word: "future", meaning: "مستقبل", example: "Your future is bright.", translation: "مستقبلك مشرق." },
-                { word: "journey", meaning: "رحلة", example: "Enjoy the journey.", translation: "استمتع بالرحلة." },
-                { word: "believe", meaning: "يؤمن / يثق", example: "Believe in yourself.", translation: "ثق بنفسك." },
-                { word: "success", meaning: "نجاح", example: "Hard work brings success.", translation: "العمل الجاد يجلب النجاح." }
-            ],
-            hard: [
-                { word: "opportunity", meaning: "فرصة", example: "Take this opportunity.", translation: "استغل هذه الفرصة." },
-                { word: "confidence", meaning: "ثقة", example: "Speak with confidence.", translation: "تحدث بثقة." },
-                { word: "discipline", meaning: "انضباط", example: "Discipline brings success.", translation: "الانضباط يجلب النجاح." },
-                { word: "achievement", meaning: "إنجاز", example: "Celebrate your achievement.", translation: "احتفل بإنجازك." },
-                { word: "persistence", meaning: "إصرار", example: "Persistence overcomes difficulties.", translation: "الإصرار يتغلب على الصعوبات." }
-            ]
-        };
-
-        const textDatabase = {
-            easy: [
-                { text: "I love learning english.", translation: "أنا أحب تعلم الإنجليزية." },
-                { text: "Today is a beautiful day.", translation: "اليوم يوم جميل." },
-                { text: "Smile every single day.", translation: "ابتسم في كل يوم." }
-            ],
-            medium: [
-                { text: "Practice every day to get better.", translation: "تدرب كل يوم لتصبح أفضل." },
-                { text: "Learning step by step makes it easy.", translation: "التعلم خطوة بخطوة يجعله سهلاً." },
-                { text: "Believe you can and you will.", translation: "آمن بأنك تستطيع وستفعل." }
-            ],
-            hard: [
-                { text: "Consistency is more important than perfection.", translation: "الاستمرارية أكثر أهمية من الكمالية." },
-                { text: "Small daily actions build extraordinary results.", translation: "الأفعال اليومية الصغيرة تبني نتائج استثنائية." },
-                { text: "Your hard work will pay off soon.", translation: "جهدك وتعبك سيؤتي ثماره قريباً." }
-            ]
-        };
-
-        // رسائل تحفيزية متجددة
-        const walidQuotes = [
-            "والله مستواك قاعد يتحسن كفو يا وحش 💪",
-            "كل يوم أفضل من اللي قبله يا وليد 🚀",
-            "استمرارك هو السر، كمل يا بطل ⚡",
-            "همس أكيد بتنبسط لما تشوف مستواك اليوم 🌸"
-        ];
-
-        const hamsQuotes = [
-            "شطورة يا همس 🌸 خطوة بخطوة وبتتقني كل الكلمات!",
-            "ما شاء الله عليك، استمرارية رهيبة ✨",
-            "وليد يفتخر فيك وبكل تدريب تسوينه 🤍",
-            "إنجاز لطيف وجميل كل يوم 🎀"
-        ];
-
-        let currentUser = "";
-        let selectedLevel = "easy";
-        let currentItems = [];
-        let currentIndex = 0;
-
-        function showScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
-
-        document.getElementById('start-btn').addEventListener('click', () => showScreen('selection-page'));
-
-        function login(user) {
-            currentUser = user;
-            showDashboard();
-        }
-
-        function setLevel(lvl) {
-            selectedLevel = lvl;
-            document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`lvl-${lvl}`).classList.add('active');
-            
-            const lvlNames = { easy: "🟢 مبتدئ", medium: "🟡 متوسط", hard: "🔴 متقدم" };
-            document.getElementById('level-badge').innerText = lvlNames[lvl];
-        }
-
-        function showDashboard() {
-            showScreen('dashboard-page');
-            document.getElementById('welcome-msg').innerText = `أهلين ${currentUser} 👋`;
-            const motivationBox = document.getElementById('motivation-msg');
-
-            // إظهار عبارات تحفيزية متجددة
-            if (currentUser === 'وليد') {
-                motivationBox.style.backgroundColor = 'var(--light-blue)';
-                const randomQuote = walidQuotes[Math.floor(Math.random() * walidQuotes.length)];
-                motivationBox.innerHTML = `<p>${randomQuote}</p>`;
-            } else {
-                motivationBox.style.backgroundColor = 'var(--light-pink)';
-                const randomQuote = hamsQuotes[Math.floor(Math.random() * hamsQuotes.length)];
-                motivationBox.innerHTML = `<p>${randomQuote}</p>`;
-            }
-        }
-
-        function exitToDashboard() {
-            showDashboard();
-        }
-
-        // ===================== 1. تدريب الكلمات =====================
-        function startWordPractice() {
-            // ترتيب عشوائي للكلمات لتجديد التدريب
-            currentItems = [...wordsDatabase[selectedLevel]].sort(() => 0.5 - Math.random());
-            currentIndex = 0;
-            showScreen('practice-page');
-            loadWord();
-        }
-
-        function loadWord() {
-            const item = currentItems[currentIndex];
-            document.getElementById('progress-text').innerText = `${currentIndex + 1} من ${currentItems.length}`;
-            
-            // تعطيل أو تفعيل زر "السابق"
-            document.getElementById('prev-btn').disabled = (currentIndex === 0);
-
-            const input = document.getElementById('type-input');
-            input.value = "";
-            input.disabled = false;
-            input.focus();
-            document.getElementById('card-details').style.display = "none";
-            renderWordDisplay("");
-        }
-
-        function renderWordDisplay(typed) {
-            const target = currentItems[currentIndex].word;
-            let html = "";
-            for (let i = 0; i < target.length; i++) {
-                if (i < typed.length) {
-                    html += typed[i].toLowerCase() === target[i].toLowerCase() 
-                        ? `<span class="char-correct">${target[i]}</span>`
-                        : `<span class="char-incorrect">${target[i]}</span>`;
-                } else {
-                    html += `<span class="char-untyped">${target[i]}</span>`;
-                }
-            }
-            document.getElementById('word-display').innerHTML = html;
-        }
-
-        document.getElementById('type-input').addEventListener('input', (e) => {
-            const typed = e.target.value;
-            const target = currentItems[currentIndex].word;
-            renderWordDisplay(typed);
-
-            if (typed.toLowerCase() === target.toLowerCase()) {
-                e.target.disabled = true;
-                const obj = currentItems[currentIndex];
-                document.getElementById('detail-word').innerText = obj.word;
-                document.getElementById('detail-meaning').innerText = obj.meaning;
-                document.getElementById('detail-example').innerText = obj.example;
-                document.getElementById('detail-translation').innerText = obj.translation;
-                document.getElementById('card-details').style.display = "block";
-            }
-        });
-
-        function nextWord() {
-            currentIndex++;
-            if (currentIndex < currentItems.length) loadWord();
-            else showScreen('result-page');
-        }
-
-        function prevWord() {
-            if (currentIndex > 0) {
-                currentIndex--;
-                loadWord();
-            }
-        }
-
-        function skipWord() {
-            nextWord();
-        }
-
-        // ===================== 2. تدريب الجمل =====================
-        function startTextPractice() {
-            currentItems = [...textDatabase[selectedLevel]].sort(() => 0.5 - Math.random());
-            currentIndex = 0;
-            showScreen('text-practice-page');
-            loadText();
-        }
-
-        function loadText() {
-            const item = currentItems[currentIndex];
-            document.getElementById('text-progress-text').innerText = `${currentIndex + 1} من ${currentItems.length}`;
-            
-            document.getElementById('text-prev-btn').disabled = (currentIndex === 0);
-
-            const input = document.getElementById('text-type-input');
-            input.value = "";
-            input.disabled = false;
-            input.focus();
-            document.getElementById('text-card-details').style.display = "none";
-            renderTextDisplay("");
-        }
-
-        function renderTextDisplay(typed) {
-            const target = currentItems[currentIndex].text;
-            let html = "";
-            for (let i = 0; i < target.length; i++) {
-                if (i < typed.length) {
-                    html += typed[i] === target[i]
-                        ? `<span class="char-correct">${target[i]}</span>`
-                        : `<span class="char-incorrect">${target[i]}</span>`;
-                } else {
-                    html += `<span class="char-untyped">${target[i]}</span>`;
-                }
-            }
-            document.getElementById('text-display').innerHTML = html;
-        }
-
-        document.getElementById('text-type-input').addEventListener('input', (e) => {
-            const typed = e.target.value;
-            const target = currentItems[currentIndex].text;
-            renderTextDisplay(typed);
-
-            if (typed === target) {
-                e.target.disabled = true;
-                document.getElementById('text-translation-detail').innerText = currentItems[currentIndex].translation;
-                document.getElementById('text-card-details').style.display = "block";
-            }
-        });
-
-        function nextText() {
-            currentIndex++;
-            if (currentIndex < currentItems.length) loadText();
-            else showScreen('result-page');
-        }
-
-        function prevText() {
-            if (currentIndex > 0) {
-                currentIndex--;
-                loadText();
-            }
-        }
-
-        function skipText() {
-            nextText();
-        } 
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
