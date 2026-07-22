@@ -83,7 +83,9 @@ const motivationalQuotes = [
   "استمر! أناملك صارت أسرع من البرق ⚡",
   "عاش! كل كلمة تكتبها تزيد من مهاراتك ⭐",
   "كفو عليك! إنجاز ممتاز ومستوى يرفع الرأس 🏆",
-  "يا سلام على السرعة والدقة! واصل يا كابتن 🌟"
+  "يا سلام على السرعة والدقة! واصل يا كابتن 🌟",
+  "طاقة وإبداع! استمر بنفس الحماس 💪",
+  "تركيزك في القمة! واصل الكتابة 🎯"
 ];
 
 // ==========================================
@@ -96,6 +98,11 @@ const timerDisplay = document.getElementById("timer");
 const scoreDisplay = document.getElementById("score");
 const motivationDisplay = document.getElementById("motivation");
 
+// عناصر الإحصائيات (الأغلاط، السرعة، الدقة)
+const mistakesDisplay = document.getElementById("mistakes") || document.getElementById("errors");
+const speedDisplay = document.getElementById("speed") || document.getElementById("wpm");
+const accuracyDisplay = document.getElementById("accuracy");
+
 const btnEasy = document.getElementById("btnEasy");
 const btnMedium = document.getElementById("btnMedium");
 const btnHard = document.getElementById("btnHard");
@@ -106,25 +113,54 @@ const modeTwoPlayers = document.getElementById("modeTwoPlayers");
 const btnRestart = document.getElementById("btnRestart");
 
 // ==========================================
-// 5. حالة اللعبة (Game State)
+// 5. حالة اللعبة والإحصائيات (Game State)
 // ==========================================
 
 let currentLevel = "easy";
-let currentMode = "words"; // 'words' أو 'texts' أو 'twoPlayers'
+let currentMode = "words"; // 'words', 'texts', 'twoPlayers'
 let currentWordList = wordsEasy;
 let currentTextList = textsEasy;
 let currentTarget = "";
+
 let score = 0;
+let mistakes = 0;
+let totalTypedChars = 0;
+let correctTypedChars = 0;
+
 let timeLeft = 60;
+let timeElapsed = 0;
 let timerInterval = null;
 let isPlaying = false;
-let activePlayer = 1; // لنمط الشخصين
+let activePlayer = 1;
 
 // ==========================================
-// 6. منطق اللعبة والربط
+// 6. منطق التحديث والإحصائيات
 // ==========================================
 
-// تغيير المستوى (يغير الكلمات والنصوص فوراً)
+// تحديث الإحصائيات الشاملة (السرعة، الدقة، الأغلاط) في الواجهة
+function updateStatsUI() {
+  if (scoreDisplay) scoreDisplay.textContent = score;
+  if (mistakesDisplay) mistakesDisplay.textContent = mistakes;
+
+  // حساب السرعة (كلمة في الدقيقة WPM)
+  const minutes = timeElapsed / 60;
+  const wpm = minutes > 0 ? Math.round((correctTypedChars / 5) / minutes) : 0;
+  if (speedDisplay) speedDisplay.textContent = wpm;
+
+  // حساب نسبة الدقة (%)
+  const accuracy = totalTypedChars > 0 ? Math.round((correctTypedChars / totalTypedChars) * 100) : 100;
+  if (accuracyDisplay) accuracyDisplay.textContent = accuracy + "%";
+}
+
+// عرض عبارة تحفيزية جديدة وتحديثها باستمرار
+function updateMotivation() {
+  if (motivationDisplay) {
+    const randomIndex = Math.floor(Math.random() * motivationalQuotes.length);
+    motivationDisplay.textContent = motivationalQuotes[randomIndex];
+  }
+}
+
+// تغيير المستوى (سهل، متوسط، صعب)
 function setLevel(level) {
   currentLevel = level;
 
@@ -139,7 +175,6 @@ function setLevel(level) {
     currentTextList = textsHard;
   }
 
-  // تحديث تمييز الأزرار في الصفحة
   [btnEasy, btnMedium, btnHard].forEach(btn => btn?.classList.remove("active"));
   if (level === "easy") btnEasy?.classList.add("active");
   if (level === "medium") btnMedium?.classList.add("active");
@@ -148,7 +183,7 @@ function setLevel(level) {
   restartGame();
 }
 
-// جلب الهدف التالي (كلمة أو نص)
+// جلب الهدف التالي
 function getNextTarget() {
   if (currentMode === "texts") {
     const randomIndex = Math.floor(Math.random() * currentTextList.length);
@@ -159,21 +194,23 @@ function getNextTarget() {
   }
 }
 
-// عرض الكلمة/النص في الواجهة
 function showNextTarget() {
   currentTarget = getNextTarget();
   if (wordDisplay) wordDisplay.textContent = currentTarget;
   if (wordInput) wordInput.value = "";
 }
 
-// بدء العداد التنازلي
+// العداد التنازلي
 function startTimer() {
   if (isPlaying) return;
   isPlaying = true;
 
   timerInterval = setInterval(() => {
     timeLeft--;
+    timeElapsed++;
+
     if (timerDisplay) timerDisplay.textContent = timeLeft;
+    updateStatsUI();
 
     if (timeLeft <= 0) {
       endGame();
@@ -181,19 +218,22 @@ function startTimer() {
   }, 1000);
 }
 
-// إنهاء الجولة
+// إنهاء اللعبة
 function endGame() {
   clearInterval(timerInterval);
   isPlaying = false;
   if (wordInput) wordInput.disabled = true;
-  
-  if (currentMode === "twoPlayers") {
-    if (wordDisplay) wordDisplay.textContent = `انتهى الوقت للاعب ${activePlayer}! مجموع نقاطك: ${score}`;
-  } else {
-    if (wordDisplay) wordDisplay.textContent = "انتهى الوقت! مجموع نقاطك: " + score;
+
+  const minutes = timeElapsed / 60;
+  const finalWpm = minutes > 0 ? Math.round((correctTypedChars / 5) / minutes) : 0;
+  const finalAcc = totalTypedChars > 0 ? Math.round((correctTypedChars / totalTypedChars) * 100) : 100;
+
+  if (wordDisplay) {
+    wordDisplay.textContent = `انتهى الوقت! النقاط: ${score} | السرعة: ${finalWpm} WPM | الدقة: ${finalAcc}%`;
   }
-  
-  if (motivationDisplay) motivationDisplay.textContent = "🏆 محاولة رائعة! اضغط إعادة التشغيل للمحاولة مجدداً.";
+  if (motivationDisplay) {
+    motivationDisplay.textContent = "🏆 أداء رائع جداً! اضغط إعادة التشغيل للبدء من جديد.";
+  }
 }
 
 // إعادة تشغيل اللعبة
@@ -201,10 +241,15 @@ function restartGame() {
   clearInterval(timerInterval);
   isPlaying = false;
   score = 0;
+  mistakes = 0;
+  totalTypedChars = 0;
+  correctTypedChars = 0;
   timeLeft = 60;
+  timeElapsed = 0;
 
-  if (scoreDisplay) scoreDisplay.textContent = score;
+  updateStatsUI();
   if (timerDisplay) timerDisplay.textContent = timeLeft;
+
   if (wordInput) {
     wordInput.disabled = false;
     wordInput.value = "";
@@ -216,29 +261,32 @@ function restartGame() {
 }
 
 // ==========================================
-// 7. الاستماع للأحداث وتفاعل الأزرار
+// 7. الاستماع للأحداث وحساب الأغلاط والطباعة
 // ==========================================
 
-// متابعة إدخال الكلمات
-wordInput?.addEventListener("input", () => {
+wordInput?.addEventListener("input", (e) => {
   if (!isPlaying && wordInput.value.length > 0) {
     startTimer();
   }
 
-  const userText = wordInput.value.trim();
+  const val = wordInput.value;
+  totalTypedChars++;
 
-  if (userText === currentTarget) {
+  // التحقق من صحة الأحرف واكتشاف الأغلاط
+  if (currentTarget.startsWith(val)) {
+    correctTypedChars++;
+  } else {
+    mistakes++;
+  }
+
+  // عند مطابقة النص كاملاً بنجاح
+  if (val.trim() === currentTarget) {
     score += 10;
-    if (scoreDisplay) scoreDisplay.textContent = score;
-
-    // إظهار تحفيز عربي عشوائي كل 30 نقطة
-    if (score % 30 === 0 && motivationDisplay) {
-      const randomQuote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
-      motivationDisplay.textContent = randomQuote;
-    }
-
+    updateMotivation(); // تحديث الكلام التحفيزي فوراً عند كل كلمة/نص صحيحة
     showNextTarget();
   }
+
+  updateStatsUI();
 });
 
 // أزرار المستويات
@@ -246,7 +294,7 @@ btnEasy?.addEventListener("click", () => setLevel("easy"));
 btnMedium?.addEventListener("click", () => setLevel("medium"));
 btnHard?.addEventListener("click", () => setLevel("hard"));
 
-// أزرار الأنماط
+// أزرار الأنواع
 modeWords?.addEventListener("click", () => {
   currentMode = "words";
   restartGame();
@@ -267,5 +315,5 @@ modeTwoPlayers?.addEventListener("click", () => {
 // زر إعادة التشغيل
 btnRestart?.addEventListener("click", restartGame);
 
-// بدء اللعبة تلقائياً على المستوى السهل
+// البدء التلقائي
 setLevel("easy");
