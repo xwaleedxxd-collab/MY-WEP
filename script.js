@@ -122,6 +122,8 @@ let currentWordList = wordsEasy;
 let currentTextList = textsEasy;
 let currentTarget = "";
 
+let targetQueue = []; // طابور الكلمات العشوائية المضمونة عدم التكرار
+
 let score = 0;
 let mistakes = 0;
 let totalTypedChars = 0;
@@ -134,25 +136,44 @@ let isPlaying = false;
 let activePlayer = 1;
 
 // ==========================================
-// 6. منطق التحديث والإحصائيات
+// 6. خوارزمية الخلط وعدم التكرار
 // ==========================================
 
-// تحديث الإحصائيات الشاملة (السرعة، الدقة، الأغلاط) في الواجهة
+// دالة خلط القائمة عشوائياً (Fisher-Yates Shuffle)
+function shuffleArray(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// جلب الكلمة/النص التالي بدون أي تكرار
+function getNextTarget() {
+  if (targetQueue.length === 0) {
+    const sourceList = (currentMode === "texts") ? currentTextList : currentWordList;
+    targetQueue = shuffleArray(sourceList);
+  }
+  return targetQueue.pop(); // يسحب الكلمة التالية ويحذفها من الطابور
+}
+
+// ==========================================
+// 7. منطق التحديث والإحصائيات
+// ==========================================
+
 function updateStatsUI() {
   if (scoreDisplay) scoreDisplay.textContent = score;
   if (mistakesDisplay) mistakesDisplay.textContent = mistakes;
 
-  // حساب السرعة (كلمة في الدقيقة WPM)
   const minutes = timeElapsed / 60;
   const wpm = minutes > 0 ? Math.round((correctTypedChars / 5) / minutes) : 0;
   if (speedDisplay) speedDisplay.textContent = wpm;
 
-  // حساب نسبة الدقة (%)
   const accuracy = totalTypedChars > 0 ? Math.round((correctTypedChars / totalTypedChars) * 100) : 100;
   if (accuracyDisplay) accuracyDisplay.textContent = accuracy + "%";
 }
 
-// عرض عبارة تحفيزية جديدة وتحديثها باستمرار
 function updateMotivation() {
   if (motivationDisplay) {
     const randomIndex = Math.floor(Math.random() * motivationalQuotes.length);
@@ -160,7 +181,6 @@ function updateMotivation() {
   }
 }
 
-// تغيير المستوى (سهل، متوسط، صعب)
 function setLevel(level) {
   currentLevel = level;
 
@@ -180,18 +200,8 @@ function setLevel(level) {
   if (level === "medium") btnMedium?.classList.add("active");
   if (level === "hard") btnHard?.classList.add("active");
 
+  targetQueue = []; // تفريغ الطابور لإعادة الخلط للمستوى الجديد
   restartGame();
-}
-
-// جلب الهدف التالي
-function getNextTarget() {
-  if (currentMode === "texts") {
-    const randomIndex = Math.floor(Math.random() * currentTextList.length);
-    return currentTextList[randomIndex];
-  } else {
-    const randomIndex = Math.floor(Math.random() * currentWordList.length);
-    return currentWordList[randomIndex];
-  }
 }
 
 function showNextTarget() {
@@ -200,7 +210,6 @@ function showNextTarget() {
   if (wordInput) wordInput.value = "";
 }
 
-// العداد التنازلي
 function startTimer() {
   if (isPlaying) return;
   isPlaying = true;
@@ -218,7 +227,6 @@ function startTimer() {
   }, 1000);
 }
 
-// إنهاء اللعبة
 function endGame() {
   clearInterval(timerInterval);
   isPlaying = false;
@@ -236,7 +244,6 @@ function endGame() {
   }
 }
 
-// إعادة تشغيل اللعبة
 function restartGame() {
   clearInterval(timerInterval);
   isPlaying = false;
@@ -246,6 +253,8 @@ function restartGame() {
   correctTypedChars = 0;
   timeLeft = 60;
   timeElapsed = 0;
+
+  targetQueue = []; // إجبار اللعبة على خلط الكلمات من جديد عند كل إعادة تشغيل
 
   updateStatsUI();
   if (timerDisplay) timerDisplay.textContent = timeLeft;
@@ -261,10 +270,10 @@ function restartGame() {
 }
 
 // ==========================================
-// 7. الاستماع للأحداث وحساب الأغلاط والطباعة
+// 8. الاستماع للأحداث وحساب الأغلاط والطباعة
 // ==========================================
 
-wordInput?.addEventListener("input", (e) => {
+wordInput?.addEventListener("input", () => {
   if (!isPlaying && wordInput.value.length > 0) {
     startTimer();
   }
@@ -272,17 +281,15 @@ wordInput?.addEventListener("input", (e) => {
   const val = wordInput.value;
   totalTypedChars++;
 
-  // التحقق من صحة الأحرف واكتشاف الأغلاط
   if (currentTarget.startsWith(val)) {
     correctTypedChars++;
   } else {
     mistakes++;
   }
 
-  // عند مطابقة النص كاملاً بنجاح
   if (val.trim() === currentTarget) {
     score += 10;
-    updateMotivation(); // تحديث الكلام التحفيزي فوراً عند كل كلمة/نص صحيحة
+    updateMotivation();
     showNextTarget();
   }
 
@@ -297,17 +304,20 @@ btnHard?.addEventListener("click", () => setLevel("hard"));
 // أزرار الأنواع
 modeWords?.addEventListener("click", () => {
   currentMode = "words";
+  targetQueue = [];
   restartGame();
 });
 
 modeTexts?.addEventListener("click", () => {
   currentMode = "texts";
+  targetQueue = [];
   restartGame();
 });
 
 modeTwoPlayers?.addEventListener("click", () => {
   currentMode = "twoPlayers";
   activePlayer = 1;
+  targetQueue = [];
   alert("تم تفعيل نمط التحدي لشخصين! يبدأ الآن اللاعب الأول 🎮");
   restartGame();
 });
