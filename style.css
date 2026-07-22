@@ -1,0 +1,149 @@
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+
+:root {
+    --white: #ffffff;
+    --light-blue: #e0f2fe;
+    --dark-blue: #7dd3fc;
+    --light-pink: #fce7f3;
+    --dark-pink: #f9a8d4;
+    --gray: #f3f4f6;
+    --dark-gray: #4b5563;
+    --text-color: #1f2937;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Tajawal', sans-serif;
+}
+
+body {
+    background-color: var(--gray);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    text-align: center;
+}
+
+.screen {
+    display: none;
+    background: var(--white);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    width: 90%;
+    max-width: 500px;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.screen.active {
+    display: block;
+}
+
+.logo {
+    color: var(--text-color);
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    color: var(--dark-gray);
+    margin-bottom: 30px;
+}
+
+.motivation-box {
+    background-color: var(--light-blue);
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    line-height: 1.8;
+}
+
+.main-btn {
+    background-color: var(--text-color);
+    color: var(--white);
+    border: none;
+    padding: 15px 40px;
+    font-size: 18px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.main-btn:hover {
+    transform: scale(1.05);
+}
+
+.cards-container {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.user-card {
+    flex: 1;
+    padding: 30px;
+    font-size: 20px;
+    border: 2px solid transparent;
+    border-radius: 15px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.user-card.walid {
+    background-color: var(--light-blue);
+    color: var(--dark-blue);
+}
+
+.user-card.walid:hover {
+    border-color: var(--dark-blue);
+    transform: translateY(-5px);
+}
+
+.user-card.hams {
+    background-color: var(--light-pink);
+    color: var(--dark-pink);
+}
+
+.user-card.hams:hover {
+    border-color: var(--dark-pink);
+    transform: translateY(-5px);
+}
+
+.dashboard-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.menu-btn {
+    background-color: var(--white);
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.menu-btn:hover {
+    background-color: var(--gray);
+}
+
+.motivation-msg {
+    margin-top: 25px;
+    padding: 15px;
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

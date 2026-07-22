@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>وليد & همس - نتعلم الإنجليزي</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
+
+        :root {
+            --white: #ffffff;
+            --light-blue: #e0f2fe;
+            --dark-blue: #0284c7;
+            --light-pink: #fce7f3;
+            --dark-pink: #db2777;
+            --gray: #f8fafc;
+            --dark-gray: #475569;
+            --text-color: #0f172a;
+            --green: #22c55e;
+            --red: #ef4444;
+            --card-border: #e2e8f0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+
+        body {
+            background-color: var(--gray);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .screen {
+            display: none;
+            background: var(--white);
+            padding: 30px 20px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+            width: 100%;
+            max-width: 520px;
+            text-align: center;
+            animation: fadeIn 0.3s ease-in-out;
+            position: relative;
+        }
+
+        .screen.active { display: block; }
+
+        .logo { font-size: 30px; font-weight: 800; margin-bottom: 8px; }
+        .subtitle { color: var(--dark-gray); margin-bottom: 20px; font-size: 15px; }
+
+        .motivation-box {
+            background-color: var(--light-blue);
+            padding: 18px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            line-height: 1.7;
+            font-size: 15px;
+        }
+
+        .main-btn {
+            background-color: var(--text-color);
+            color: var(--white);
+            border: none;
+            padding: 14px 30px;
+            font-size: 17px;
+            font-weight: 700;
+            border-radius: 30px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        .main-btn:hover { opacity: 0.95; transform: translateY(-1px); }
+
+        .cards-container { display: flex; gap: 15px; margin-top: 20px; }
+
+        .user-card {
+            flex: 1;
+            padding: 25px 15px;
+            font-size: 20px;
+            border: 2px solid transparent;
+            border-radius: 18px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .user-card.walid { background-color: var(--light-blue); color: var(--dark-blue); }
+        .user-card.hams { background-color: var(--light-pink); color: var(--dark-pink); }
+        .user-card:hover { transform: translateY(-3px); }
+
+        .level-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .level-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid var(--card-border);
+            border-radius: 12px;
+            background: var(--white);
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 14px;
+        }
+
+        .level-btn.active {
+            border-color: var(--dark-blue);
+            background-color: var(--light-blue);
+            color: var(--dark-blue);
+        }
+
+        .dashboard-menu { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
+
+        .menu-btn {
+            background-color: var(--white);
+            border: 2px solid var(--card-border);
+            padding: 14px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .menu-btn.primary { background-color: var(--dark-blue); color: white; border: none; }
+        .menu-btn.secondary { background-color: #f1f5f9; color: var(--text-color); border: none; }
+
+        /* شريط التحكم بالتنقل داخل التدريب */
+        .practice-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .nav-btn-icon {
+            background: #f1f5f9;
+            border: 1px solid var(--card-border);
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            color: var(--dark-gray);
+            transition: 0.2s;
+        }
+
+        .nav-btn-icon:hover { background: #e2e8f0; }
+        .nav-btn-icon:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .word-display, .text-display {
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin: 20px 0;
+            direction: ltr;
+            min-height: 50px;
+            word-break: break-word;
+        }
+
+        .text-display { font-size: 20px; line-height: 1.6; text-align: left; }
+
+        .char-correct { color: var(--green); }
+        .char-incorrect { color: var(--red); background-color: #fee2e2; border-radius: 3px; }
+        .char-untyped { color: #cbd5e1; }
+
+        .type-input {
+            width: 100%;
+            padding: 14px;
+            font-size: 18px;
+            text-align: center;
+            direction: ltr;
+            border: 2px solid #cbd5e1;
+            border-radius: 14px;
+            outline: none;
+            margin-bottom: 15px;
+        }
+
+        .type-input:focus { border-color: var(--dark-blue); }
+
+        .card-details {
+            background-color: #f8fafc;
+            border: 1px solid var(--card-border);
+            padding: 18px;
+            border-radius: 16px;
+            margin-top: 15px;
+            text-align: right;
+            display: none;
+        }
+
+        .card-details h3 { color: var(--text-color); margin-bottom: 6px; direction: ltr; text-align: right; }
+        .card-details p { color: var(--dark-gray); margin-bottom: 6px; font-size: 14px; }
+
+        .next-btn {
+            background-color: var(--green);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 12px;
+            width: 100%;
+        }
+
+        .streak-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #fff7ed;
+            color: #c2410c;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 15px;
+            border: 1px solid #ffedd5;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <!-- 1. الشاشة الرئيسية -->
+    <div id="landing-page" class="screen active">
+        <h1 class="logo">🤍 وليد & همس</h1>
+        <p class="subtitle">نتعلم الإنجليزي مع بعض، كلمة... كلمة.</p>
+        <div class="motivation-box">
+            <p>اليوم كلمة...</p>
+            <p>بكرة جملة...</p>
+            <p>وبعدها بتلقى نفسك تتكلم إنجليزي بدون ما تحس.</p>
+        </div>
+        <button id="start-btn" class="main-btn">ابدأ 🚀</button>
+    </div>
+
+    <!-- 2. اختيار الحساب -->
+    <div id="selection-page" class="screen">
+        <h2>من أنت اليوم؟</h2>
+        <div class="cards-container">
+            <button class="user-card walid" onclick="login('وليد')">🤍 وليد</button>
+            <button class="user-card hams" onclick="login('همس')">🌸 همس</button>
+        </div>
+    </div>
+
+    <!-- 3. لوحة التحكم -->
+    <div id="dashboard-page" class="screen">
+        <div id="streak-box" class="streak-badge">🔥 حماس متواصل: <span id="streak-count">1</span> أيام</div>
+        <h2 id="welcome-msg">أهلين 👋</h2>
+        
+        <p style="margin-top: 15px; font-size:14px; font-weight:bold; color:var(--dark-gray);">اختر مستواك اليوم:</p>
+        <div class="level-selector">
+            <button class="level-btn active" id="lvl-easy" onclick="setLevel('easy')">🟢 مبتدئ</button>
+            <button class="level-btn" id="lvl-medium" onclick="setLevel('medium')">🟡 متوسط</button>
+            <button class="level-btn" id="lvl-hard" onclick="setLevel('hard')">🔴 متقدم</button>
+        </div>
+
+        <div class="dashboard-menu">
+            <button class="menu-btn primary" onclick="startWordPractice()">
+                <span>🚀 تدريب الكلمات</span>
+                <span id="level-badge" style="font-size:12px; opacity:0.8;">🟢 مبتدئ</span>
+            </button>
+            <button class="menu-btn secondary" onclick="startTextPractice()">
+                <span>📝 تدريب الجمل والنصوص</span>
+                <span style="font-size:12px; color:var(--dark-gray);">حسب المستوى</span>
+            </button>
+        </div>
+        
+        <div id="motivation-msg" class="motivation-box"></div>
+        <button onclick="showScreen('selection-page')" style="background:none; border:none; color:var(--dark-gray); cursor:pointer; font-size:13px;">تبديل الحساب 🔄</button>
+    </div>
+
+    <!-- 4. تدريب الكلمات -->
+    <div id="practice-page" class="screen">
+        <!-- شريط تحكم للتنقل (إلغاء، سابق، سكب) -->
+        <div class="practice-nav">
+            <button class="nav-btn-icon" onclick="exitToDashboard()">🏠 خروج</button>
+            <span style="color: var(--dark-gray); font-size: 13px; font-weight:bold;" id="progress-text">1 من 5</span>
+            <div>
+                <button class="nav-btn-icon" id="prev-btn" onclick="prevWord()">⏪ السابق</button>
+                <button class="nav-btn-icon" onclick="skipWord()">⏭️ سكب</button>
+            </div>
+        </div>
+        
+        <div id="word-display" class="word-display"></div>
+        <input type="text" id="type-input" class="type-input" placeholder="اكتب الكلمة هنا..." autocomplete="off" spellcheck="false">
+
+        <div id="card-details" class="card-details">
+            <h3 id="detail-word">Word</h3>
+            <p><strong>المعنى:</strong> <span id="detail-meaning">-</span></p>
+            <p><strong>مثال:</strong> <span id="detail-example">-</span></p>
+            <p style="font-size: 13px; color: #64748b;" id="detail-translation">-</p>
+            <button class="next-btn" onclick="nextWord()">التالي →</button>
+        </div>
+    </div>
+
+    <!-- 5. تدريب الجمل والنصوص -->
+    <div id="text-practice-page" class="screen">
+        <!-- شريط تحكم للتنقل -->
+        <div class="practice-nav">
+            <button class="nav-btn-icon" onclick="exitToDashboard()">🏠 خروج</button>
+            <span style="color: var(--dark-gray); font-size: 13px; font-weight:bold;" id="text-progress-text">1 من 2</span>
+            <div>
+                <button class="nav-btn-icon" id="text-prev-btn" onclick="prevText()">⏪ السابق</button>
+                <button class="nav-btn-icon" onclick="skipText()">⏭️ سكب</button>
+            </div>
+        </div>
+
+        <div id="text-display" class="text-display"></div>
+        <textarea id="text-type-input" class="type-input" rows="3" placeholder="اكتب النص هنا..." autocomplete="off" spellcheck="false" style="text-align:left; resize:none;"></textarea>
+
+        <div id="text-card-details" class="card-details">
+            <h3 style="direction:rtl; text-align:right;">💡 الترجمة والمعنى:</h3>
+            <p id="text-translation-detail" style="font-size:15px; font-weight:bold; color:var(--dark-blue);"></p>
+            <button class="next-btn" onclick="nextText()">النص التالي →</button>
+        </div>
+    </div>
+
+    <!-- 6. نهاية الجلسة -->
+    <div id="result-page" class="screen">
+        <h2>🎉 بطل! أنجزت جلسة اليوم</h2>
+        <p class="subtitle" id="result-user-msg">مستواك يفرق كل يوم عن اللي قبله</p>
+        <button class="main-btn" onclick="showDashboard()">العودة للرئيسية 🏠</button>
+    </div>
+
+    <script>
+        // === موسّع الكلمات المتنوعة حسب المستويات ===
+        const wordsDatabase = {
+            easy: [
+                { word: "cat", meaning: "قطة", example: "The cat is sleeping.", translation: "القطة نائمة." },
+                { word: "sun", meaning: "شمس", example: "The sun is bright.", translation: "الشمس ساطعة." },
+                { word: "book", meaning: "كتاب", example: "I read a book.", translation: "أنا أقرأ كتاباً." },
+                { word: "happy", meaning: "سعيد", example: "Be happy today.", translation: "كن سعيداً اليوم." },
+                { word: "moon", meaning: "قمر", example: "The moon looks nice.", translation: "القمر يبدو جميلاً." },
+                { word: "smile", meaning: "ابتسامة", example: "Keep smiling.", translation: "استمر بالابتسام." }
+            ],
+            medium: [
+                { word: "friend", meaning: "صديق", example: "You are a good friend.", translation: "أنت صديق جيد." },
+                { word: "future", meaning: "مستقبل", example: "Your future is bright.", translation: "مستقبلك مشرق." },
+                { word: "journey", meaning: "رحلة", example: "Enjoy the journey.", translation: "استمتع بالرحلة." },
+                { word: "believe", meaning: "يؤمن / يثق", example: "Believe in yourself.", translation: "ثق بنفسك." },
+                { word: "success", meaning: "نجاح", example: "Hard work brings success.", translation: "العمل الجاد يجلب النجاح." }
+            ],
+            hard: [
+                { word: "opportunity", meaning: "فرصة", example: "Take this opportunity.", translation: "استغل هذه الفرصة." },
+                { word: "confidence", meaning: "ثقة", example: "Speak with confidence.", translation: "تحدث بثقة." },
+                { word: "discipline", meaning: "انضباط", example: "Discipline brings success.", translation: "الانضباط يجلب النجاح." },
+                { word: "achievement", meaning: "إنجاز", example: "Celebrate your achievement.", translation: "احتفل بإنجازك." },
+                { word: "persistence", meaning: "إصرار", example: "Persistence overcomes difficulties.", translation: "الإصرار يتغلب على الصعوبات." }
+            ]
+        };
+
+        const textDatabase = {
+            easy: [
+                { text: "I love learning english.", translation: "أنا أحب تعلم الإنجليزية." },
+                { text: "Today is a beautiful day.", translation: "اليوم يوم جميل." },
+                { text: "Smile every single day.", translation: "ابتسم في كل يوم." }
+            ],
+            medium: [
+                { text: "Practice every day to get better.", translation: "تدرب كل يوم لتصبح أفضل." },
+                { text: "Learning step by step makes it easy.", translation: "التعلم خطوة بخطوة يجعله سهلاً." },
+                { text: "Believe you can and you will.", translation: "آمن بأنك تستطيع وستفعل." }
+            ],
+            hard: [
+                { text: "Consistency is more important than perfection.", translation: "الاستمرارية أكثر أهمية من الكمالية." },
+                { text: "Small daily actions build extraordinary results.", translation: "الأفعال اليومية الصغيرة تبني نتائج استثنائية." },
+                { text: "Your hard work will pay off soon.", translation: "جهدك وتعبك سيؤتي ثماره قريباً." }
+            ]
+        };
+
+        // رسائل تحفيزية متجددة
+        const walidQuotes = [
+            "والله مستواك قاعد يتحسن كفو يا وحش 💪",
+            "كل يوم أفضل من اللي قبله يا وليد 🚀",
+            "استمرارك هو السر، كمل يا بطل ⚡",
+            "همس أكيد بتنبسط لما تشوف مستواك اليوم 🌸"
+        ];
+
+        const hamsQuotes = [
+            "شطورة يا همس 🌸 خطوة بخطوة وبتتقني كل الكلمات!",
+            "ما شاء الله عليك، استمرارية رهيبة ✨",
+            "وليد يفتخر فيك وبكل تدريب تسوينه 🤍",
+            "إنجاز لطيف وجميل كل يوم 🎀"
+        ];
+
+        let currentUser = "";
+        let selectedLevel = "easy";
+        let currentItems = [];
+        let currentIndex = 0;
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        document.getElementById('start-btn').addEventListener('click', () => showScreen('selection-page'));
+
+        function login(user) {
+            currentUser = user;
+            showDashboard();
+        }
+
+        function setLevel(lvl) {
+            selectedLevel = lvl;
+            document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`lvl-${lvl}`).classList.add('active');
+            
+            const lvlNames = { easy: "🟢 مبتدئ", medium: "🟡 متوسط", hard: "🔴 متقدم" };
+            document.getElementById('level-badge').innerText = lvlNames[lvl];
+        }
+
+        function showDashboard() {
+            showScreen('dashboard-page');
+            document.getElementById('welcome-msg').innerText = `أهلين ${currentUser} 👋`;
+            const motivationBox = document.getElementById('motivation-msg');
+
+            // إظهار عبارات تحفيزية متجددة
+            if (currentUser === 'وليد') {
+                motivationBox.style.backgroundColor = 'var(--light-blue)';
+                const randomQuote = walidQuotes[Math.floor(Math.random() * walidQuotes.length)];
+                motivationBox.innerHTML = `<p>${randomQuote}</p>`;
+            } else {
+                motivationBox.style.backgroundColor = 'var(--light-pink)';
+                const randomQuote = hamsQuotes[Math.floor(Math.random() * hamsQuotes.length)];
+                motivationBox.innerHTML = `<p>${randomQuote}</p>`;
+            }
+        }
+
+        function exitToDashboard() {
+            showDashboard();
+        }
+
+        // ===================== 1. تدريب الكلمات =====================
+        function startWordPractice() {
+            // ترتيب عشوائي للكلمات لتجديد التدريب
+            currentItems = [...wordsDatabase[selectedLevel]].sort(() => 0.5 - Math.random());
+            currentIndex = 0;
+            showScreen('practice-page');
+            loadWord();
+        }
+
+        function loadWord() {
+            const item = currentItems[currentIndex];
+            document.getElementById('progress-text').innerText = `${currentIndex + 1} من ${currentItems.length}`;
+            
+            // تعطيل أو تفعيل زر "السابق"
+            document.getElementById('prev-btn').disabled = (currentIndex === 0);
+
+            const input = document.getElementById('type-input');
+            input.value = "";
+            input.disabled = false;
+            input.focus();
+            document.getElementById('card-details').style.display = "none";
+            renderWordDisplay("");
+        }
+
+        function renderWordDisplay(typed) {
+            const target = currentItems[currentIndex].word;
+            let html = "";
+            for (let i = 0; i < target.length; i++) {
+                if (i < typed.length) {
+                    html += typed[i].toLowerCase() === target[i].toLowerCase() 
+                        ? `<span class="char-correct">${target[i]}</span>`
+                        : `<span class="char-incorrect">${target[i]}</span>`;
+                } else {
+                    html += `<span class="char-untyped">${target[i]}</span>`;
+                }
+            }
+            document.getElementById('word-display').innerHTML = html;
+        }
+
+        document.getElementById('type-input').addEventListener('input', (e) => {
+            const typed = e.target.value;
+            const target = currentItems[currentIndex].word;
+            renderWordDisplay(typed);
+
+            if (typed.toLowerCase() === target.toLowerCase()) {
+                e.target.disabled = true;
+                const obj = currentItems[currentIndex];
+                document.getElementById('detail-word').innerText = obj.word;
+                document.getElementById('detail-meaning').innerText = obj.meaning;
+                document.getElementById('detail-example').innerText = obj.example;
+                document.getElementById('detail-translation').innerText = obj.translation;
+                document.getElementById('card-details').style.display = "block";
+            }
+        });
+
+        function nextWord() {
+            currentIndex++;
+            if (currentIndex < currentItems.length) loadWord();
+            else showScreen('result-page');
+        }
+
+        function prevWord() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                loadWord();
+            }
+        }
+
+        function skipWord() {
+            nextWord();
+        }
+
+        // ===================== 2. تدريب الجمل =====================
+        function startTextPractice() {
+            currentItems = [...textDatabase[selectedLevel]].sort(() => 0.5 - Math.random());
+            currentIndex = 0;
+            showScreen('text-practice-page');
+            loadText();
+        }
+
+        function loadText() {
+            const item = currentItems[currentIndex];
+            document.getElementById('text-progress-text').innerText = `${currentIndex + 1} من ${currentItems.length}`;
+            
+            document.getElementById('text-prev-btn').disabled = (currentIndex === 0);
+
+            const input = document.getElementById('text-type-input');
+            input.value = "";
+            input.disabled = false;
+            input.focus();
+            document.getElementById('text-card-details').style.display = "none";
+            renderTextDisplay("");
+        }
+
+        function renderTextDisplay(typed) {
+            const target = currentItems[currentIndex].text;
+            let html = "";
+            for (let i = 0; i < target.length; i++) {
+                if (i < typed.length) {
+                    html += typed[i] === target[i]
+                        ? `<span class="char-correct">${target[i]}</span>`
+                        : `<span class="char-incorrect">${target[i]}</span>`;
+                } else {
+                    html += `<span class="char-untyped">${target[i]}</span>`;
+                }
+            }
+            document.getElementById('text-display').innerHTML = html;
+        }
+
+        document.getElementById('text-type-input').addEventListener('input', (e) => {
+            const typed = e.target.value;
+            const target = currentItems[currentIndex].text;
+            renderTextDisplay(typed);
+
+            if (typed === target) {
+                e.target.disabled = true;
+                document.getElementById('text-translation-detail').innerText = currentItems[currentIndex].translation;
+                document.getElementById('text-card-details').style.display = "block";
+            }
+        });
+
+        function nextText() {
+            currentIndex++;
+            if (currentIndex < currentItems.length) loadText();
+            else showScreen('result-page');
+        }
+
+        function prevText() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                loadText();
+            }
+        }
+
+        function skipText() {
+            nextText();
+        }
+    </script>
+</body>
+</html>
