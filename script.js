@@ -1,5 +1,5 @@
 // ==========================================
-// 1. بنك الكلمات الإنجليزية (80 كلمة لكل مستوى)
+// 1. قوائم الكلمات الإنجليزية (محدثة بالكامل)
 // ==========================================
 
 const wordsEasy = [
@@ -36,7 +36,7 @@ const wordsHard = [
 ];
 
 // ==========================================
-// 2. بنك النصوص الإنجليزية (مقسم حسب المستوى)
+// 2. قوائم النصوص الإنجليزية
 // ==========================================
 
 const textsEasy = [
@@ -73,7 +73,7 @@ const textsHard = [
 ];
 
 // ==========================================
-// 3. بنك الكلام التحفيزي (باللغة العربية)
+// 3. عبارات التحفيز
 // ==========================================
 
 const motivationalQuotes = [
@@ -83,13 +83,11 @@ const motivationalQuotes = [
   "استمر! أناملك صارت أسرع من البرق ⚡",
   "عاش! كل كلمة تكتبها تزيد من مهاراتك ⭐",
   "كفو عليك! إنجاز ممتاز ومستوى يرفع الرأس 🏆",
-  "يا سلام على السرعة والدقة! واصل يا كابتن 🌟",
-  "طاقة وإبداع! استمر بنفس الحماس 💪",
-  "تركيزك في القمة! واصل الكتابة 🎯"
+  "يا سلام على السرعة والدقة! واصل يا كابتن 🌟"
 ];
 
 // ==========================================
-// 4. ربط عناصر الواجهة (DOM Elements)
+// 4. عناصر الصفحات والحالة
 // ==========================================
 
 const wordDisplay = document.getElementById("wordDisplay");
@@ -98,9 +96,8 @@ const timerDisplay = document.getElementById("timer");
 const scoreDisplay = document.getElementById("score");
 const motivationDisplay = document.getElementById("motivation");
 
-// عناصر الإحصائيات (الأغلاط، السرعة، الدقة)
-const mistakesDisplay = document.getElementById("mistakes") || document.getElementById("errors");
-const speedDisplay = document.getElementById("speed") || document.getElementById("wpm");
+const mistakesDisplay = document.getElementById("mistakes");
+const speedDisplay = document.getElementById("speed");
 const accuracyDisplay = document.getElementById("accuracy");
 
 const btnEasy = document.getElementById("btnEasy");
@@ -112,17 +109,13 @@ const modeTexts = document.getElementById("modeTexts");
 const modeTwoPlayers = document.getElementById("modeTwoPlayers");
 const btnRestart = document.getElementById("btnRestart");
 
-// ==========================================
-// 5. حالة اللعبة والإحصائيات (Game State)
-// ==========================================
-
 let currentLevel = "easy";
-let currentMode = "words"; // 'words', 'texts', 'twoPlayers'
+let currentMode = "words";
 let currentWordList = wordsEasy;
 let currentTextList = textsEasy;
 let currentTarget = "";
 
-let targetQueue = []; // طابور الكلمات العشوائية المضمونة عدم التكرار
+let targetQueue = [];
 
 let score = 0;
 let mistakes = 0;
@@ -133,13 +126,8 @@ let timeLeft = 60;
 let timeElapsed = 0;
 let timerInterval = null;
 let isPlaying = false;
-let activePlayer = 1;
 
-// ==========================================
-// 6. خوارزمية الخلط وعدم التكرار
-// ==========================================
-
-// دالة خلط القائمة عشوائياً (Fisher-Yates Shuffle)
+// خوارزمية الخلط لتجنب التكرار
 function shuffleArray(array) {
   const arr = [...array];
   for (let i = arr.length - 1; i > 0; i--) {
@@ -149,18 +137,13 @@ function shuffleArray(array) {
   return arr;
 }
 
-// جلب الكلمة/النص التالي بدون أي تكرار
 function getNextTarget() {
   if (targetQueue.length === 0) {
     const sourceList = (currentMode === "texts") ? currentTextList : currentWordList;
     targetQueue = shuffleArray(sourceList);
   }
-  return targetQueue.pop(); // يسحب الكلمة التالية ويحذفها من الطابور
+  return targetQueue.pop();
 }
-
-// ==========================================
-// 7. منطق التحديث والإحصائيات
-// ==========================================
 
 function updateStatsUI() {
   if (scoreDisplay) scoreDisplay.textContent = score;
@@ -183,24 +166,16 @@ function updateMotivation() {
 
 function setLevel(level) {
   currentLevel = level;
-
-  if (level === "easy") {
-    currentWordList = wordsEasy;
-    currentTextList = textsEasy;
-  } else if (level === "medium") {
-    currentWordList = wordsMedium;
-    currentTextList = textsMedium;
-  } else if (level === "hard") {
-    currentWordList = wordsHard;
-    currentTextList = textsHard;
-  }
+  if (level === "easy") { currentWordList = wordsEasy; currentTextList = textsEasy; }
+  else if (level === "medium") { currentWordList = wordsMedium; currentTextList = textsMedium; }
+  else if (level === "hard") { currentWordList = wordsHard; currentTextList = textsHard; }
 
   [btnEasy, btnMedium, btnHard].forEach(btn => btn?.classList.remove("active"));
   if (level === "easy") btnEasy?.classList.add("active");
   if (level === "medium") btnMedium?.classList.add("active");
   if (level === "hard") btnHard?.classList.add("active");
 
-  targetQueue = []; // تفريغ الطابور لإعادة الخلط للمستوى الجديد
+  targetQueue = [];
   restartGame();
 }
 
@@ -213,17 +188,12 @@ function showNextTarget() {
 function startTimer() {
   if (isPlaying) return;
   isPlaying = true;
-
   timerInterval = setInterval(() => {
     timeLeft--;
     timeElapsed++;
-
     if (timerDisplay) timerDisplay.textContent = timeLeft;
     updateStatsUI();
-
-    if (timeLeft <= 0) {
-      endGame();
-    }
+    if (timeLeft <= 0) endGame();
   }, 1000);
 }
 
@@ -231,99 +201,42 @@ function endGame() {
   clearInterval(timerInterval);
   isPlaying = false;
   if (wordInput) wordInput.disabled = true;
-
-  const minutes = timeElapsed / 60;
-  const finalWpm = minutes > 0 ? Math.round((correctTypedChars / 5) / minutes) : 0;
-  const finalAcc = totalTypedChars > 0 ? Math.round((correctTypedChars / totalTypedChars) * 100) : 100;
-
-  if (wordDisplay) {
-    wordDisplay.textContent = `انتهى الوقت! النقاط: ${score} | السرعة: ${finalWpm} WPM | الدقة: ${finalAcc}%`;
-  }
-  if (motivationDisplay) {
-    motivationDisplay.textContent = "🏆 أداء رائع جداً! اضغط إعادة التشغيل للبدء من جديد.";
-  }
+  if (wordDisplay) wordDisplay.textContent = `انتهى الوقت! النقاط: ${score}`;
 }
 
 function restartGame() {
   clearInterval(timerInterval);
   isPlaying = false;
-  score = 0;
-  mistakes = 0;
-  totalTypedChars = 0;
-  correctTypedChars = 0;
-  timeLeft = 60;
-  timeElapsed = 0;
-
-  targetQueue = []; // إجبار اللعبة على خلط الكلمات من جديد عند كل إعادة تشغيل
-
+  score = 0; mistakes = 0; totalTypedChars = 0; correctTypedChars = 0;
+  timeLeft = 60; timeElapsed = 0;
+  targetQueue = [];
   updateStatsUI();
   if (timerDisplay) timerDisplay.textContent = timeLeft;
-
-  if (wordInput) {
-    wordInput.disabled = false;
-    wordInput.value = "";
-    wordInput.focus();
-  }
+  if (wordInput) { wordInput.disabled = false; wordInput.value = ""; wordInput.focus(); }
   if (motivationDisplay) motivationDisplay.textContent = "";
-
   showNextTarget();
 }
 
-// ==========================================
-// 8. الاستماع للأحداث وحساب الأغلاط والطباعة
-// ==========================================
-
 wordInput?.addEventListener("input", () => {
-  if (!isPlaying && wordInput.value.length > 0) {
-    startTimer();
-  }
-
+  if (!isPlaying && wordInput.value.length > 0) startTimer();
   const val = wordInput.value;
   totalTypedChars++;
-
-  if (currentTarget.startsWith(val)) {
-    correctTypedChars++;
-  } else {
-    mistakes++;
-  }
-
+  if (currentTarget.startsWith(val)) correctTypedChars++; else mistakes++;
   if (val.trim() === currentTarget) {
     score += 10;
     updateMotivation();
     showNextTarget();
   }
-
   updateStatsUI();
 });
 
-// أزرار المستويات
 btnEasy?.addEventListener("click", () => setLevel("easy"));
 btnMedium?.addEventListener("click", () => setLevel("medium"));
 btnHard?.addEventListener("click", () => setLevel("hard"));
 
-// أزرار الأنواع
-modeWords?.addEventListener("click", () => {
-  currentMode = "words";
-  targetQueue = [];
-  restartGame();
-});
-
-modeTexts?.addEventListener("click", () => {
-  currentMode = "texts";
-  targetQueue = [];
-  restartGame();
-});
-
-modeTwoPlayers?.addEventListener("click", () => {
-  currentMode = "twoPlayers";
-  activePlayer = 1;
-  targetQueue = [];
-  alert("تم تفعيل نمط التحدي لشخصين! يبدأ الآن اللاعب الأول 🎮");
-  restartGame();
-});
-
-// زر إعادة التشغيل
+modeWords?.addEventListener("click", () => { currentMode = "words"; targetQueue = []; restartGame(); });
+modeTexts?.addEventListener("click", () => { currentMode = "texts"; targetQueue = []; restartGame(); });
+modeTwoPlayers?.addEventListener("click", () => { currentMode = "twoPlayers"; targetQueue = []; restartGame(); });
 btnRestart?.addEventListener("click", restartGame);
 
-// البدء التلقائي
 setLevel("easy");
